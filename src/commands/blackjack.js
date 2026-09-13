@@ -1,10 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('blackjack')
-        .setDescription('Play a game of Blackjack (21)'),
-    async execute(interaction) {
+    name: 'blackjack',
+    description: 'Play a game of Blackjack (21)',
+    async execute(message, args) {
         const suits = ['♠', '♥', '♦', '♣'];
         const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
@@ -40,23 +37,26 @@ module.exports = {
         const playerScore = calculateHand(playerHand);
         const dealerScore = calculateHand(dealerHand);
 
-        const embed = new EmbedBuilder()
-            .setTitle('🃏 Blackjack / 21')
-            .setColor('#2b2d31')
-            .addFields(
-                { name: 'Your Hand', value: ${playerHand.map(c => `${c.value}${c.suit}).join(' ')} (Score: ${playerScore})`, inline: true },
-                { name: "Dealer's Hand", value: ${dealerHand[0].value}${dealerHand[0].suit} 🂠, inline: true }
-            );
-
+        let resultText = '';
         if (playerScore === 21) {
-            embed.setDescription('🎉 *Blackjack! You win!*');
+            resultText = '🎉 *Blackjack! You win!*';
         } else if (playerScore > 21) {
-            embed.setDescription('💥 *Bust! You went over 21.*');
+            resultText = '💥 *Bust! You went over 21.*';
         } else {
-            embed.setDescription(Dealer revealed: ${dealerHand[1].value}${dealerHand[1].suit} (Total: ${dealerScore})\n +
-                (playerScore > dealerScore || dealerScore > 21 ? '🏆 *You win!*' : playerScore === dealerScore ? '🤝 *It\'s a tie!*' : '❌ *Dealer wins!*'));
+            resultText = Dealer revealed: ${dealerHand[1].value}${dealerHand[1].suit} (Total: ${dealerScore})\n +
+                (playerScore > dealerScore || dealerScore > 21 ? '🏆 *You win!*' : playerScore === dealerScore ? '🤝 *It\'s a tie!*' : '❌ *Dealer wins!*');
         }
 
-        await interaction.reply({ embeds: [embed] });
+        const embed = {
+            title: '🃏 Blackjack / 21',
+            color: 0x2b2d31,
+            fields: [
+                { name: 'Your Hand', value: ${playerHand.map(c => `${c.value}${c.suit}).join(' ')} (Score: ${playerScore})`, inline: true },
+                { name: "Dealer's Hand", value: ${dealerHand[0].value}${dealerHand[0].suit} 🂠, inline: true }
+            ],
+            description: resultText
+        };
+
+        await message.channel.send({ embeds: [embed] });
     },
 };
